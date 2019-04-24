@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import pdb
 import argparse
 
-#Model params
+#Global Constants
+
+##Fixed Model Parameters
 MAX_ACCEL = 10
 MAX_DECCEL = -10
 LATENCY = 0
@@ -12,7 +14,7 @@ MIN_SPEED = 0
 MAX_SPEED = 10
 ROAD_LEN = 50
 
-#Decision variables
+##Decision variables
 FOLLOWING_DIST = 1
 JERK = 2
 
@@ -58,14 +60,15 @@ class Car():
         self.speed = min(self.speed, self.max_speed) # we can't go too fast
 
 class Road():
-    def __init__(self, op_dist=FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
+    def __init__(self, following_dist=FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
         self.num_cars = num_cars
-        self.cars = list()
-        self.op_dist = op_dist
+        self.following_dist = following_dist
         self.jerk = jerk
         self.timestep = timestep # simulation_timestep
+
+        self.cars = list()
         for i in range(num_cars):
-            self.cars.append(Car(i, self.op_dist, self.jerk)) # initialize the cars on our roadway
+            self.cars.append(Car(i, self.following_dist, self.jerk)) # initialize the cars on our roadway
 
     def plot_car_locations(self):
         car_locations = list()
@@ -109,8 +112,8 @@ class Road():
 
         return True # none of them were still on the road
 
-def black_box(op_dist, jerk, show_locations=True):
-    road = Road(op_dist, jerk)
+def black_box(following_dist, jerk, show_locations=True):
+    road = Road(following_dist, jerk)
     num_timesteps = 0
     while not road.are_all_past():
         if show_locations:
@@ -123,7 +126,7 @@ def black_box(op_dist, jerk, show_locations=True):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--op-dist", default=FOLLOWING_DIST, type=float)
+    parser.add_argument("--following-dist", default=FOLLOWING_DIST, type=float)
     parser.add_argument("--jerk", default=JERK, type=float)
     parser.add_argument("--show-accel-graph", action="store_true", help="show the car's policy on acceleration versus distance to the nearest car")
     parser.add_argument("--show-simulation", action="store_true", help="show the simulation of the cars driving")
@@ -134,12 +137,12 @@ if __name__ == "__main__":
     args = parse_args()
     if args.show_accel_graph:
         temp_location = 0
-        Car(temp_location, args.op_dist, args.jerk).plot_accel_of_dists()
-    #car = Car(args.op_dist, args.jerk)
+        Car(temp_location, args.following_dist, args.jerk).plot_accel_of_dists()
+    #car = Car(args.following_dist, args.jerk)
     #car.plot_accel_of_dists()
-    #road = Road(args.op_dist, args.jerk, NUM_CARS) # make sure you can initialize Road
+    #road = Road(args.following_dist, args.jerk, NUM_CARS) # make sure you can initialize Road
     #while True:
     #    road.plot_car_locations()
     #    road.move_cars()
-    num_timesteps = black_box(args.op_dist, args.jerk, args.show_simulation)
-    print("It took {} timesteps for all the cars to clear the road with an optimal following distance of {} and a jerk of {}".format(num_timesteps, args.op_dist, args.jerk))
+    num_timesteps = black_box(args.following_dist, args.jerk, args.show_simulation)
+    print("It took {} timesteps for all the cars to clear the road with an optimal following distance of {} and a jerk of {}".format(num_timesteps, args.following_dist, args.jerk))
