@@ -8,22 +8,26 @@ MAX_ACCEL = 10
 MAX_DECCEL = -10
 LATENCY = 0
 NUM_CARS = 7
+MIN_SPEED = 0
+MAX_SPEED = 10
 
 #Decision variables
-OP_FOLLOWING_DIST = 8
+OP_FOLLOWING_DIST = 1
 JERK = 2
 
 class Car():
     """
     A class which represents a single car controlled by the ACC system
     """
-    def __init__(self, location=0, op_following_dist=OP_FOLLOWING_DIST, jerk=JERK, max_accel=MAX_ACCEL, max_deccel=MAX_DECCEL):
+    def __init__(self, location=0, op_following_dist=OP_FOLLOWING_DIST, jerk=JERK, max_accel=MAX_ACCEL, max_deccel=MAX_DECCEL, min_speed=MIN_SPEED, max_speed=MAX_SPEED):
         self.location = location
         self.op_following_dist = op_following_dist
         self.jerk = jerk
         self.max_accel = max_accel
         self.max_deccel = max_deccel
-        self.speed = 1
+        self.min_speed = min_speed
+        self.max_speed = max_speed
+        self.speed = 1 # this should be updated so it's an input
 
     def accel_of_dist(self, dist):
         accel = (dist - self.op_following_dist) * self.jerk # compute the sloped section
@@ -49,14 +53,18 @@ class Car():
         accel = self.accel_of_dist(dist_to_next)
         self.location = self.location + self.speed * timestep
         self.speed = self.speed + accel * timestep
+        self.speed = max(self.speed, self.min_speed) # we aren't going to go backward
+        self.speed = min(self.speed, self.max_speed) # we can't go too fast
 
 class Road():
-    def __init__(self, num_cars=NUM_CARS, timestep = 0.1):
+    def __init__(self, num_cars=NUM_CARS, op_dist=OP_FOLLOWING_DIST, jerk=JERK, timestep = 0.1):
         self.num_cars = num_cars
         self.cars = list()
+        self.op_dist = op_dist
+        self.jerk = jerk
         self.timestep = timestep # simulation_timestep
         for i in range(num_cars):
-            self.cars.append(Car(i))
+            self.cars.append(Car(i, self.op_dist, self.jerk)) # initialize the cars on our roadway
 
     def plot_car_locations(self):
         car_locations = list()
@@ -106,7 +114,7 @@ if __name__ == "__main__":
     args = parse_args()
     #car = Car(args.op_dist, args.jerk)
     #car.plot_accel_of_dists()
-    road = Road(NUM_CARS) # make sure you can initialize Road
+    road = Road(NUM_CARS, args.op_dist, args.jerk) # make sure you can initialize Road
     while True:
         road.plot_car_locations()
         road.move_cars()
