@@ -10,6 +10,7 @@ LATENCY = 0
 NUM_CARS = 7
 MIN_SPEED = 0
 MAX_SPEED = 10
+ROAD_LEN = 50
 
 #Decision variables
 OP_FOLLOWING_DIST = 1
@@ -35,7 +36,7 @@ class Car():
         accel = np.max([accel, self.max_deccel]) # make sure it's not too small, i.e. create the bottom horizontal part
         return accel
 
-    def plot_accel_of_dists(self, max_dist=OP_FOLLOWING_DIST*3):
+    def plot_accel_of_dists(self, max_dist=OP_FOLLOWING_DIST*10):
         dists = np.linspace(0, max_dist, num=200)
         accels_of_dist = list()
         for dist in dists:
@@ -57,7 +58,7 @@ class Car():
         self.speed = min(self.speed, self.max_speed) # we can't go too fast
 
 class Road():
-    def __init__(self, num_cars=NUM_CARS, op_dist=OP_FOLLOWING_DIST, jerk=JERK, timestep = 0.1):
+    def __init__(self, op_dist=OP_FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
         self.num_cars = num_cars
         self.cars = list()
         self.op_dist = op_dist
@@ -99,22 +100,45 @@ class Road():
                     min_dist = min(min_dist, dist) # find the nearest car
 
             dist_for_each_car.append(min_dist)
-
         return dist_for_each_car
+
+    def are_all_past(self, road_len=ROAD_LEN):
+        for car in self.cars:
+            if car.location < road_len:
+                return False # one was still one the road
+
+        return True # none of them were still on the road
+
+
+
+def black_box(op_dist, jerk):
+    road = Road(op_dist, jerk)
+    num_timesteps = 0
+    while not road.are_all_past():
+        road.plot_car_locations()
+        road.move_cars()
+        num_timesteps += 1
+
+    return num_timesteps
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--op-dist", default=OP_FOLLOWING_DIST, type=float)
     parser.add_argument("--jerk", default=JERK, type=float)
+    parser.add_argument("--show-accel-graph", action="store_true")
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = parse_args()
+    if args.show_accel_graph:
+        temp_location = 0
+        Car(temp_location, args.op_dist, args.jerk).plot_accel_of_dists()
     #car = Car(args.op_dist, args.jerk)
     #car.plot_accel_of_dists()
-    road = Road(NUM_CARS, args.op_dist, args.jerk) # make sure you can initialize Road
-    while True:
-        road.plot_car_locations()
-        road.move_cars()
+    #road = Road(args.op_dist, args.jerk, NUM_CARS) # make sure you can initialize Road
+    #while True:
+    #    road.plot_car_locations()
+    #    road.move_cars()
+    print(black_box(args.op_dist, args.jerk))
