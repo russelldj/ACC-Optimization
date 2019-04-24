@@ -13,16 +13,16 @@ MAX_SPEED = 10
 ROAD_LEN = 50
 
 #Decision variables
-OP_FOLLOWING_DIST = 1
+FOLLOWING_DIST = 1
 JERK = 2
 
 class Car():
     """
     A class which represents a single car controlled by the ACC system
     """
-    def __init__(self, location=0, op_following_dist=OP_FOLLOWING_DIST, jerk=JERK, max_accel=MAX_ACCEL, max_deccel=MAX_DECCEL, min_speed=MIN_SPEED, max_speed=MAX_SPEED):
+    def __init__(self, location=0, following_dist=FOLLOWING_DIST, jerk=JERK, max_accel=MAX_ACCEL, max_deccel=MAX_DECCEL, min_speed=MIN_SPEED, max_speed=MAX_SPEED):
         self.location = location
-        self.op_following_dist = op_following_dist
+        self.following_dist = following_dist
         self.jerk = jerk
         self.max_accel = max_accel
         self.max_deccel = max_deccel
@@ -31,12 +31,12 @@ class Car():
         self.speed = 1 # this should be updated so it's an input
 
     def accel_of_dist(self, dist):
-        accel = (dist - self.op_following_dist) * self.jerk # compute the sloped section
+        accel = (dist - self.following_dist) * self.jerk # compute the sloped section
         accel = np.min([accel, self.max_accel]) # make sure it's not too big, i.e. create the top horizontal part
         accel = np.max([accel, self.max_deccel]) # make sure it's not too small, i.e. create the bottom horizontal part
         return accel
 
-    def plot_accel_of_dists(self, max_dist=OP_FOLLOWING_DIST*10):
+    def plot_accel_of_dists(self, max_dist=FOLLOWING_DIST*10):
         dists = np.linspace(0, max_dist, num=200)
         accels_of_dist = list()
         for dist in dists:
@@ -58,7 +58,7 @@ class Car():
         self.speed = min(self.speed, self.max_speed) # we can't go too fast
 
 class Road():
-    def __init__(self, op_dist=OP_FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
+    def __init__(self, op_dist=FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
         self.num_cars = num_cars
         self.cars = list()
         self.op_dist = op_dist
@@ -80,7 +80,7 @@ class Road():
         """
         move based on the speed
         """
-        #spoofed_dist_to_next = OP_FOLLOWING_DIST * 1.5# this should make them accelerate
+        #spoofed_dist_to_next = FOLLOWING_DIST * 1.5# this should make them accelerate
         dists_to_next = self.get_dist_to_next()
         for i, car in enumerate(self.cars):
             dist_to_next = dists_to_next[i]
@@ -123,7 +123,7 @@ def black_box(op_dist, jerk, show_locations=True):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--op-dist", default=OP_FOLLOWING_DIST, type=float)
+    parser.add_argument("--op-dist", default=FOLLOWING_DIST, type=float)
     parser.add_argument("--jerk", default=JERK, type=float)
     parser.add_argument("--show-accel-graph", action="store_true", help="show the car's policy on acceleration versus distance to the nearest car")
     parser.add_argument("--show-simulation", action="store_true", help="show the simulation of the cars driving")
