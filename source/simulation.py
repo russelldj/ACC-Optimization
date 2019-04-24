@@ -71,7 +71,7 @@ class Road():
         car_locations = list()
         for car in self.cars:
             car_locations.append(car.location)
-        plt.xlim(0, 50)
+        plt.xlim(0, ROAD_LEN)
         plt.scatter(car_locations, np.zeros_like(car_locations)) #scatter plot of locations with y=0
         plt.pause(0.1) # display
         plt.cla() # clear the points
@@ -109,13 +109,12 @@ class Road():
 
         return True # none of them were still on the road
 
-
-
-def black_box(op_dist, jerk):
+def black_box(op_dist, jerk, show_locations=True):
     road = Road(op_dist, jerk)
     num_timesteps = 0
     while not road.are_all_past():
-        road.plot_car_locations()
+        if show_locations:
+            road.plot_car_locations()
         road.move_cars()
         num_timesteps += 1
 
@@ -126,7 +125,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--op-dist", default=OP_FOLLOWING_DIST, type=float)
     parser.add_argument("--jerk", default=JERK, type=float)
-    parser.add_argument("--show-accel-graph", action="store_true")
+    parser.add_argument("--show-accel-graph", action="store_true", help="show the car's policy on acceleration versus distance to the nearest car")
+    parser.add_argument("--show-simulation", action="store_true", help="show the simulation of the cars driving")
     args = parser.parse_args()
     return args
 
@@ -141,4 +141,5 @@ if __name__ == "__main__":
     #while True:
     #    road.plot_car_locations()
     #    road.move_cars()
-    print(black_box(args.op_dist, args.jerk))
+    num_timesteps = black_box(args.op_dist, args.jerk, args.show_simulation)
+    print("It took {} timesteps for all the cars to clear the road with an optimal following distance of {} and a jerk of {}".format(num_timesteps, args.op_dist, args.jerk))
