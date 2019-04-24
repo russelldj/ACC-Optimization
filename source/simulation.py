@@ -112,7 +112,7 @@ class Road():
 
         return True # none of them were still on the road
 
-def black_box(following_dist, jerk, show_locations=True):
+def black_box(following_dist, jerk, show_locations=False):
     road = Road(following_dist, jerk)
     num_timesteps = 0
     while not road.are_all_past():
