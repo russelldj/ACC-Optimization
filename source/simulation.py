@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import pdb
 import argparse
+import queue
 
 #Global Constants
 
@@ -9,7 +11,7 @@ import argparse
 MAX_ACCEL = 10
 MAX_DECCEL = -10
 LATENCY = 0
-NUM_CARS = 2
+NUM_CARS = 7
 MIN_SPEED = 0
 MAX_SPEED = 10
 ROAD_LEN = 50
@@ -31,6 +33,9 @@ class Car():
         self.min_speed = min_speed
         self.max_speed = max_speed
         self.speed = 1 # this should be updated so it's an input
+        self.latency = 0 # the number of timesteps to wait
+        self.distance_buffer = [0] * self.latency # this is a bit criptic. We're creating a queue of distances to simulate
+        # a person's reaction latency
 
     def accel_of_dist(self, dist):
         accel = (dist - self.following_dist) * self.jerk # compute the sloped section
@@ -53,6 +58,8 @@ class Car():
         move based on the speed * timestep
         Use the acceleration to update the speed
         """
+        self.distance_buffer.append(dist_to_next) # add this observation to the list
+        dist_to_next = self.distance_buffer.pop(0) # get the observation which has been in the queue the longest
         accel = self.accel_of_dist(dist_to_next)
         self.location = self.location + self.speed * timestep
         self.speed = self.speed + accel * timestep
@@ -60,22 +67,27 @@ class Car():
         self.speed = min(self.speed, self.max_speed) # we can't go too fast
 
 class Road():
-    def __init__(self, following_dist=FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, timestep = 0.1):
+    def __init__(self, following_dist=FOLLOWING_DIST, jerk=JERK, num_cars=NUM_CARS, road_len=ROAD_LEN, timestep = 0.1):
         self.num_cars = num_cars
         self.following_dist = following_dist
         self.jerk = jerk
+        self.road_len = road_len
         self.timestep = timestep # simulation_timestep
-
         self.cars = list()
-        for i in range(num_cars):
-            self.cars.append(Car(i, self.following_dist, self.jerk)) # initialize the cars on our roadway
+        self.init_cars()
+
+    def init_cars(self):
+        for _ in range(self.num_cars):
+            loc = np.random.random_sample() * self.road_len / 2.0
+            self.cars.append(Car(loc, self.following_dist, self.jerk)) # initialize the cars on our roadway
 
     def plot_car_locations(self):
         car_locations = list()
         for car in self.cars:
             car_locations.append(car.location)
         plt.xlim(0, ROAD_LEN)
-        plt.scatter(car_locations, np.zeros_like(car_locations)) #scatter plot of locations with y=0
+        colors = cm.rainbow(np.linspace(0, 1, len(car_locations)))
+        plt.scatter(car_locations, np.zeros_like(car_locations), c=colors) #scatter plot of locations with y=0
         plt.pause(0.1) # display
         plt.cla() # clear the points
 
