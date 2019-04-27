@@ -1,4 +1,4 @@
-This is a repository for the optimization of a cruise control system.
+This is a repository contains code for an optimization project done for MA579 at Clarkson University by Isabel Dengos and David Russell. The goal is to find the optimal parameters for an adaptive cruise control system.
 
 # quickstart 
 To experiement with the system go into the `source` directory and run `python simulation.py`.
