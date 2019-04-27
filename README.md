@@ -15,5 +15,4 @@ I made an example optimization script in `source/optimization_examples.py`. Curr
 	[0.99997875 1.99999764]`
 
 # Contour plot
-![Contour plot](countour.png)
-Format: ![Alt Text](url)
+![Contour plot](https://github.com/russelldj/ACC-Optimization/blob/master/contour.png)
