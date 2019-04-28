@@ -76,10 +76,15 @@ class Road():
         self.cars = list()
         self.init_cars()
 
-    def init_cars(self):
-        for _ in range(self.num_cars):
-            loc = np.random.random_sample() * self.road_len / 2.0
-            self.cars.append(Car(loc, self.following_dist, self.jerk)) # initialize the cars on our roadway
+    def init_cars(self, random=False):
+        if random:
+            for _ in range(self.num_cars):
+                loc = np.random.random_sample() * self.road_len / 2.0
+                self.cars.append(Car(loc, self.following_dist, self.jerk)) # initialize the cars on our roadway
+        else:
+            for loc in np.linspace(0,self.road_len / 2.0, self.num_cars):
+                self.cars.append(Car(loc, self.following_dist, self.jerk))
+
 
     def plot_car_locations(self):
         car_locations = list()
