@@ -60,5 +60,3 @@ if __name__ == "__main__":
     plt.scatter(accumulator_np[:,0], accumulator_np[:,1],color=colors)
     plot(black_box, [min(accumulator_np[:,0]),max(accumulator_np[:,0]),min(accumulator_np[:,1]),max(accumulator_np[:,1])],40)
     #plot(black_box, [0,4,0,4],40)
-
-

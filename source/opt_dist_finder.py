@@ -1,5 +1,6 @@
 import simulation
 import matplotlib.pyplot as plt
+import pdb
 JERK=3
 Follow=7
 
@@ -18,13 +19,19 @@ plt.clf()
 print(follow_vector)
 print(time)
 follow_vector=[] #list()
-time=[]
+times=[]
+gas=[]
 # do this again with constant following distance
 for i in range (12):
     follow_vector.append(i)
-    time.append(simulation.black_box(Follow,i))
+    t, g = simulation.black_box(Follow,i,False,True) # get the time taken and gas used
+    times.append(t)
+    gas.append(g)
 
-plt.scatter(follow_vector,time)
+plt.scatter(follow_vector,times)
+plt.scatter(follow_vector,gas)
+print(gas)
+plt.legend(["times", "gas"])
 plt.show()
 
 #how to plot and see plot:
