@@ -85,6 +85,7 @@ class Road():
         self.road_len = road_len
         self.timestep = timestep # simulation_timestep
         self.cars = list()
+        self.crashes = 0
         self.init_cars(random_cars)
 
     def init_cars(self, random=False):
@@ -111,10 +112,19 @@ class Road():
         """
         move based on the speed
         """
+        #TODO record the order of the cars and see if it's changed
+        old_locations = [car.location for car in self.cars]
         dists_to_next = self.get_dist_to_next()
         for i, car in enumerate(self.cars):
             dist_to_next = dists_to_next[i]
             car.move(dist_to_next, self.timestep)
+
+        #check if there was a crash
+        old_order = np.argsort(old_locations) # determine the order which makes the array sorted
+        new_locations = [car.location for car in self.cars]
+        new_order = np.argsort(new_locations)
+        if np.array_equal(old_order, new_order): # this means that one passed another one
+            self.crashes += 1
 
     def get_dist_to_next(self):
         """
@@ -161,7 +171,8 @@ def black_box(following_dist, jerk, show_locations=False, return_gas_used=False)
         return num_timesteps
     else:
         gas_used = road.get_gas_used()
-        return num_timesteps, gas_used
+        crashes = road.crashes
+        return num_timesteps, gas_used, crashes
 
 def parse_args():
     parser = argparse.ArgumentParser()
