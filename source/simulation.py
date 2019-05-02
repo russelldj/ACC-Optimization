@@ -78,7 +78,7 @@ class Car():
 
 
 class Road():
-    def __init__(self, following_dist=FOLLOWING_DIST, jerk=JERK, random_cars=True, num_cars=NUM_CARS, road_len=ROAD_LEN, timestep = 0.1):
+    def __init__(self, following_dist=FOLLOWING_DIST, jerk=JERK, random_cars=False, num_cars=NUM_CARS, road_len=ROAD_LEN, timestep = 0.01):
         self.num_cars = num_cars
         self.following_dist = following_dist
         self.jerk = jerk
@@ -86,7 +86,7 @@ class Road():
         self.timestep = timestep # simulation_timestep
         self.cars = list()
         self.crashes = 0
-        self.init_cars(random_cars)
+        self.init_cars(random_cars) #Can change this to false in the def line above to remove randomness
 
     def init_cars(self, random=False):
         if random:

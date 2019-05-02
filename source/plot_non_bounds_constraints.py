@@ -49,12 +49,12 @@ accumulator = list()
 
 
 def constraint1(x):
-    return np.atleast_1d(x[0] + x[1]) # these must be greater than zero
+    return np.atleast_1d(x[0] + x[1]) #equal to zero
 
 def constraint2(x):
-    return np.atleast_1d(x[1] - 1)
+    return np.atleast_1d(x[1] - 1) #greater than or equal to zero
 
-res = optimize.minimize(f, np.array([4, 3]), method="SLSQP",
+res = optimize.minimize(f, np.array([7, 3]), method="SLSQP",
                      constraints=[{"fun": constraint1, "type": "eq"},{"fun": constraint2, "type": "ineq"}])
 accumulated = np.array(accumulator)
 pl.plot(accumulated[:, 0], accumulated[:, 1])

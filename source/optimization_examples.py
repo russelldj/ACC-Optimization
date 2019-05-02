@@ -9,6 +9,11 @@ from simulation import black_box
 
 accumulator = list()
 
+
+def f(x):
+    # Store the list of function calls
+    accumulator.append(x)
+    return np.sqrt(x[0]**2 + x[1]**2)
 "example taken from https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html"
 def rosen(x):
     """The Rosenbrock function"""
@@ -28,12 +33,12 @@ def black_box_averager(x, y, num_iters=5):
         value += black_box(x,y)
     return value / float(num_iters)
 
-def black_box_vector_input(following_jerk):
-    accumulator.append(following_jerk)
+def black_box_vector_input(following_jerk): #First the optimizer determines the best values but they come out into two scalar variables, in order to put it in the black box to evaluate it, it needs to be in vector form which we put it in here
+    accumulator.append(following_jerk)  #saves x[i] at current iteration
     following, jerk = following_jerk
     return black_box(following, jerk)
 
-def plot(function_, limits=[0,1,0,1], samples=20):
+def plot(function_, limits=[0,1,0,1], samples=20, is_vector=False):
     X_MIN = 0
     X_MAX = 1
     Y_MIN = 2
@@ -43,20 +48,27 @@ def plot(function_, limits=[0,1,0,1], samples=20):
     y_list = np.linspace(limits[Y_MIN], limits[Y_MAX], samples)
     for j in tqdm(range(samples)): #progess bar
         for i in range(samples):
-            z[i,j] = function_(x_list[j],y_list[i])
-    plt.contour(x_list, y_list, z)
+            if is_vector:
+                z[i,j] = function_(np.array([x_list[j], y_list[i]]))
+            else:
+                z[i,j] = function_(x_list[j],y_list[i])
+
+    colors= plt.contour(x_list, y_list, z)
+    plt.colorbar(colors)
     plt.xlabel("following distance")
     plt.ylabel("jerk")
     plt.title("contour plot of the time taken, averaged over a few iterations")
     plt.show()
 
 if __name__ == "__main__":
-    x0 = np.array([2.0,2.0])
-    res = minimize(black_box_vector_input, x0, method='nelder-mead',
+    x0 = np.array([6,0.5])
+    res = minimize(f, x0, method='nelder-mead',
                    options={'xtol': 1e-8, 'disp': True})
     print(res.x)
     accumulator_np = np.array(accumulator)
     colors = cm.rainbow(np.linspace(0, 1, len(accumulator)))
     plt.scatter(accumulator_np[:,0], accumulator_np[:,1],color=colors)
-    plot(black_box, [min(accumulator_np[:,0]),max(accumulator_np[:,0]),min(accumulator_np[:,1]),max(accumulator_np[:,1])],40)
-    #plot(black_box, [0,4,0,4],40)
+
+    #plt.legend(loc='upper left')
+    #plot(black_box, [min(accumulator_np[:,0]),max(accumulator_np[:,0]),min(accumulator_np[:,1]),max(accumulator_np[:,1])],40)
+    plot(f, [-8,8,-8,8],20, True) #replace black_box with rosen2d
