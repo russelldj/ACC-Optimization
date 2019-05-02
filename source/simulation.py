@@ -8,8 +8,8 @@ import queue
 #Global Constants
 
 ##Fixed Model Parameters
-MAX_ACCEL = 10
-MAX_DECCEL = -10
+MAX_ACCEL = 1
+MAX_DECCEL = -1
 LATENCY = 0
 NUM_CARS = 7
 MIN_SPEED = 0
@@ -18,7 +18,7 @@ ROAD_LEN = 50
 
 ##Decision variables
 FOLLOWING_DIST = 0.5
-JERK = 3
+JERK = 6.0
 
 class Car():
     """
