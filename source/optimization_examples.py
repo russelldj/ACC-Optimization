@@ -7,8 +7,8 @@ import matplotlib.cm as cm
 
 from simulation import black_box
 
-accumulator = list()
-
+accumulator = list() # store the parameter choices over time
+iteration_values = list() # store the value of the objective function
 
 def f(x):
     # Store the list of function calls
@@ -45,7 +45,9 @@ def black_box_vector_input_plus_penalty(following_jerk): #First the optimizer de
     following, jerk = following_jerk
     function_cost = black_box(following, jerk)
     penalty_cost = penalty(following_jerk)
-    return function_cost + penalty_cost
+    total_cost = function_cost + penalty_cost
+    iteration_values.append(total_cost)
+    return total_cost
 
 def plot(function_, limits=[0,1,0,1], samples=20, is_vector=False,load=True,title="plot of time versus parameters"):
     X_MIN = 0
@@ -110,13 +112,24 @@ def nelder_mead_penalty():
     return res
 
 def plot_func_plus_penalty(load_saved=True):
-    plot(black_box_vector_input_plus_penalty, [0.5,8,0.5,8],10, True, load_saved, "Fhunction plus penalty versus parameters, with iterations overlayed")
+    plot(black_box_vector_input_plus_penalty, [0.5,8,0.5,8],10, True, load_saved, "Function plus penalty versus parameters, with iterations overlayed")
 
 def plot_penalty(load_saved=False):
     plot(penalty, [-4.0,FOLLOWING_MAX + 4,-4.0,JERK_MAX + 4],10, True, load_saved, "Plot of penalty versus parameters, with iterations overlayed")
 
 def plot_func(load_saved=False):
     plot(black_box_vector_input, [0.5,8,0.5,8],10, True, load_saved, "Plot of function versus parameters, with iterations overlayed")
+
+def plot_iteration_values(values):
+    values = np.array(values)
+    values = values - values[-1] + 1 # make the last element be one so it visualizes better
+    plt.clf()
+    plt.yscale("log") # plot it on a logarithmic scale
+    plt.plot(values)
+    plt.xlabel("iterations")
+    plt.ylabel("normalized function plus penalty values (log)")
+    plt.savefig("../results/iteration_values.png")
+    plt.clf()
 
 if __name__ == "__main__":
     # Do the optimization
@@ -125,6 +138,9 @@ if __name__ == "__main__":
     accumulator_np = np.array(accumulator)
     np.save("iterations.npy", accumulator_np)
     print(accumulator_np)
+
+    # plot the function values versus iterations
+    plot_iteration_values(iteration_values)
 
     # Plot it againsts three different backgrounds
     colors = cm.rainbow(np.linspace(0, 1, len(accumulator)))
