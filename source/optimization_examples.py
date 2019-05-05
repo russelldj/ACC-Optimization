@@ -60,12 +60,20 @@ def plot(function_, limits=[0,1,0,1], samples=20, is_vector=False):
     plt.title("contour plot of the time taken, averaged over a few iterations")
     plt.show()
 
+def constraint1(x):
+    return np.atleast_1d(x[0] + x[1]) #equal to zero
+
+def constraint2(x):
+    return np.atleast_1d(x[1] - 1) #greater than or equal to zero
+
 if __name__ == "__main__":
-    x0 = np.array([6,0.5])
-    res = minimize(f, x0, method='nelder-mead',
-                   options={'xtol': 1e-8, 'disp': True})
+    x0 = np.array([6.0,4.0])
+    res = minimize(f, x0, method='SLSQP', constraints=[{"fun": constraint2, "type": "ineq"}])
+
     print(res.x)
     accumulator_np = np.array(accumulator)
+    print(accumulator_np)
+    pdb.set_trace()
     colors = cm.rainbow(np.linspace(0, 1, len(accumulator)))
     plt.scatter(accumulator_np[:,0], accumulator_np[:,1],color=colors)
 
